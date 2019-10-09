@@ -2,7 +2,7 @@ package com.cloudwebrtc.webrtc;
 
 import android.Manifest;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -13,9 +13,11 @@ import android.os.Looper;
 import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import androidx.annotation.Nullable;
+
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.content.Intent;
-import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
 import android.view.WindowManager;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
@@ -42,6 +44,8 @@ import org.webrtc.*;
 import org.webrtc.audio.JavaAudioDeviceModule;
 
 import io.flutter.plugin.common.MethodChannel.Result;
+
+import com.google.ar.sceneform.ux.ArFragment;
 
 /**
  * The implementation of {@code getUserMedia} extracted into a separate file in
@@ -80,7 +84,7 @@ class GetUserMediaImpl{
     private final SparseArray<MediaRecorderImpl> mediaRecorders = new SparseArray<>();
 
     public void screenRequestPremissions(ResultReceiver resultReceiver){
-        Activity activity = plugin.getActivity();
+        FragmentActivity activity = (FragmentActivity) plugin.getActivity();
 
         Bundle args = new Bundle();
         args.putParcelable(RESULT_RECEIVER, resultReceiver);
@@ -89,10 +93,8 @@ class GetUserMediaImpl{
         ScreenRequestPermissionsFragment fragment = new ScreenRequestPermissionsFragment();
         fragment.setArguments(args);
 
-        FragmentTransaction transaction
-                = activity.getFragmentManager().beginTransaction().add(
-                fragment,
-                fragment.getClass().getName());
+        FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction().add(
+                fragment, fragment.getClass().getName());
 
         try {
             transaction.commit();
@@ -101,15 +103,15 @@ class GetUserMediaImpl{
         }
     }
 
-    public static class ScreenRequestPermissionsFragment extends Fragment {
+    public static class ScreenRequestPermissionsFragment extends ArFragment {
 
         private  ResultReceiver resultReceiver = null;
         private  int requestCode = 0;
         private int resultCode = 0;
 
         private void checkSelfPermissions(boolean requestPermissions) {
-            if(resultCode != Activity.RESULT_OK) {
-                Activity activity = this.getActivity();
+            if(resultCode != FragmentActivity.RESULT_OK) {
+                FragmentActivity activity = this.getActivity();
                 Bundle args = getArguments();
                 resultReceiver = args.getParcelable(RESULT_RECEIVER);
                 requestCode = args.getInt(REQUEST_CODE);
@@ -117,7 +119,7 @@ class GetUserMediaImpl{
             }
         }
 
-        public void requestStart(Activity activity, int requestCode) {
+        public void requestStart(FragmentActivity activity, int requestCode) {
             if (android.os.Build.VERSION.SDK_INT < minAPILevel) {
                 Log.w(TAG, "Can't run requestStart() due to a low API level. API level 21 or higher is required.");
                 return;
@@ -138,7 +140,7 @@ class GetUserMediaImpl{
             super.onActivityResult(requestCode, resultCode, data);
             resultCode = resultCode;
             String[] permissions;
-            if (resultCode != Activity.RESULT_OK) {
+            if (resultCode != FragmentActivity.RESULT_OK) {
                 finish();
                 Bundle resultData = new Bundle();
                 resultData.putString(PERMISSIONS, PERMISSION_SCREEN);
@@ -155,9 +157,9 @@ class GetUserMediaImpl{
         }
 
         private void finish() {
-            Activity activity = getActivity();
+            FragmentActivity activity = getActivity();
             if (activity != null) {
-                activity.getFragmentManager().beginTransaction()
+                activity.getSupportFragmentManager().beginTransaction()
                         .remove(this)
                         .commitAllowingStateLoss();
             }
@@ -440,7 +442,7 @@ class GetUserMediaImpl{
                 int resultCode = resultData.getInt(GRANT_RESULTS);
                 Intent mediaProjectionData = resultData.getParcelable(PROJECTION_DATA);
 
-                if (resultCode != Activity.RESULT_OK) {
+                if (resultCode != FragmentActivity.RESULT_OK) {
                     result.error(null, "User didn't give permission to capture the screen.", null);
                     return;
                 }
