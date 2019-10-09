@@ -1,7 +1,6 @@
 package com.cloudwebrtc.webrtc;
 
 import android.Manifest;
-import android.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,7 +13,6 @@ import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import androidx.annotation.Nullable;
 
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
