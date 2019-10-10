@@ -173,6 +173,7 @@ class GetUserMediaImpl{
     GetUserMediaImpl(
             FlutterWebRTCPlugin plugin,
             Context applicationContext) {
+        Log.d(TAG, "GetUserMediaImpl Call!!");
          this.plugin = plugin;
          this.applicationContext = applicationContext;
     }
